@@ -1,10 +1,14 @@
 plugins {
     id 'org.springframework.boot' version '2.7.5'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id "io.spring.dependency-management" version "1.1.0"
+    id "io.freefair.lombok" version "6.5.1"
+    id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
     id 'java'
 }
 
-group = 'com.androsor'
+apply from: 'versions.gradle'
+
+group = 'com.androsor99'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
@@ -12,6 +16,7 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    querydsl.extendsFrom annotationProcessor, implementation, compileOnly, runtimeOnly
 }
 
 repositories {
@@ -20,9 +25,26 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.postgresql:postgresql'
+    implementation 'com.querydsl:querydsl-jpa'
+    implementation 'org.liquibase:liquibase-core'
+
+    annotationProcessor 'com.querydsl:querydsl-apt'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "org.testcontainers:postgresql:${versions.testcontainers}"
+
+}
+
+querydsl {
+    jpa = true
+    library ="com.querydsl:querydsl-apt:${versions.querydsl}"
+    querydslSourcesDir = "$buildDir/generated/sources/annotationProcessor/java/main"
+}
+
+compileQuerydsl {
+    options.annotationProcessorPath = configurations.querydsl
 }
 
 tasks.named('test') {
